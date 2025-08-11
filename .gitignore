@@ -1,0 +1,38 @@
+# C 컴파일 결과물
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dylib
+
+# 의존성 파일
+*.d
+
+# 빌드 디렉토리
+build/
+*/build/
+
+# 실행 파일 디렉토리 (각 프로젝트의 bin 폴더)
+bin/
+*/bin/
+
+# 개발 도구 관련
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS 관련
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Todo 파일들 (개인용)
+Todo.md
+*/Todo.md
+
+# 컴파일 명령어 데이터베이스 (선택적)
+# compile_commands.json

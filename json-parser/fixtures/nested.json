@@ -1,0 +1,9 @@
+{
+  "user": {
+    "id": 1,
+    "name": "Alice",
+    "friends": ["Bob", "Charlie"],
+    "active": true,
+    "meta": null
+  }
+}

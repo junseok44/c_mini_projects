@@ -1,0 +1,32 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-g",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "build/main.o",
+      "src/main.c"
+    ],
+    "directory": "/Users/jangjunseok/Desktop/playground/c-mini-project/json-parser",
+    "file": "/Users/jangjunseok/Desktop/playground/c-mini-project/json-parser/src/main.c",
+    "output": "/Users/jangjunseok/Desktop/playground/c-mini-project/json-parser/build/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-g",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "build/read_file.o",
+      "src/read_file.c"
+    ],
+    "directory": "/Users/jangjunseok/Desktop/playground/c-mini-project/json-parser",
+    "file": "/Users/jangjunseok/Desktop/playground/c-mini-project/json-parser/src/read_file.c",
+    "output": "/Users/jangjunseok/Desktop/playground/c-mini-project/json-parser/build/read_file.o"
+  }
+]
