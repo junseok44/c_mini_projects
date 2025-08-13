@@ -12,6 +12,6 @@ typedef struct {
 
 FileData read_file_all(const char *path);
 
-void free_filedata(FileData *fd);
+void free_file_data(FileData *fd);
 
 #endif
