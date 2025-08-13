@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 
 #include "read_file.h"
+#include "lexer_next.h"
 
 static void print_help(const char* prog) {
     printf("jsoncli - JSON parser\n");
@@ -38,12 +39,17 @@ int main(int argc, char **argv) {
 
         if (!fd.ok) {
             fprintf(stderr, "file error: %s: %s\n", path, fd.err ? fd.err : "unknown");
-            free_filedata(&fd);
+            free_file_data(&fd);
             return 2;
         }
 
-        printf("%s", fd.buf);
-        free_filedata(&fd);
+        Token t;
+        
+        while ((t = lexer_next(fd.buf)).kind != TK_EOF) {
+            print_token(t);
+        }
+
+        free_file_data(&fd);
 
         return 0;
     } else if (strcmp(argv[1], "get") == 0) {
@@ -58,12 +64,12 @@ int main(int argc, char **argv) {
 
         if (!fd.ok) {
             fprintf(stderr, "file error: %s: %s\n", path, fd.err ? fd.err : "unknown");
-            free_filedata(&fd);
+            free_file_data(&fd);
             return 2;
         }
 
         printf("%s", fd.buf);
-        free_filedata(&fd);
+        free_file_data(&fd);
         
         return 0;
     } else {
