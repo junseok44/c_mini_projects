@@ -18,7 +18,15 @@ typedef struct {
     const char* message;
 } Token;
 
-Token lexer_next(char *buf);
+typedef struct {
+    const char *buf;
+    size_t index;
+    int line, col;
+} Lexer;
+
+Lexer lexer_init(const char *buf);
+
+Token lexer_next(Lexer *lexer);
 
 void print_token(Token token);
 

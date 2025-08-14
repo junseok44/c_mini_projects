@@ -6,62 +6,63 @@
 #include <ctype.h>
 
 static int is_boundary(char p) {
-    return (p == '\0' || isspace(p) || p == ',' || p == ']' || p == '}');
+    return (p == '\0' || isspace((unsigned char) p) || p == ',' || p == ']' || p == '}');
 }
 
-Token lexer_next(char *buf) {
+Lexer lexer_init(const char *p) {
+    Lexer lx = {p, 0, 1, 1};
+    return lx;
+}
+
+Token lexer_next(Lexer *lexer) {
     Token token = {0};
 
-    static int line = 1;
-    static int col = 1;
-    static size_t index = 0;
-
-    while (buf[index] == ' ' || buf[index] == '\n' || buf[index] == '\r' || buf[index] == '\t') {
-        switch(buf[index]) {
+    while (lexer -> buf[lexer -> index] == ' ' || lexer -> buf[lexer -> index] == '\n' || lexer -> buf[lexer -> index] == '\r' || lexer -> buf[lexer -> index] == '\t') {
+        switch(lexer -> buf[lexer -> index]) {
             case ' ':
-                col++;
+                lexer->col++;
                 break;
             case '\r':
-                line++;
-                col = 1;
-                if (*(buf + index + 1) == '\n')
-                    index++;
+                lexer->line++;
+                lexer->col = 1;
+                if (*(lexer -> buf + lexer -> index + 1) == '\n')
+                    lexer -> index++;
                 break;
             case '\n':
-                line++;
-                col = 1;
+                lexer->line++;
+                lexer->col = 1;
                 break;
             case '\t':
-                col += 4;
+                lexer->col += 4;
                 break;
         }
-        index++;
+        lexer -> index++;
     }
 
     int number_length = 0;
     int char_length = 0;
 
-    if (buf[index] == '-' || isdigit((unsigned char) buf[index]) != 0) {
-        number_length = scan_number(buf + index, &token, line, col);
+    if (lexer -> buf[lexer -> index] == '-' || isdigit((unsigned char) lexer -> buf[lexer -> index]) != 0) {
+        number_length = scan_number(lexer -> buf + lexer -> index, &token, lexer->line, lexer->col);
         if (number_length) {
-            // 이러면 숫자인거고. 숫자 길이만큼. index를 추가해준다.
-            index += number_length;
-            col += number_length;
+            // 이러면 숫자인거고. 숫자 길이만큼. lexer -> index를 추가해준다.
+            lexer -> index += number_length;
+            lexer->col += number_length;
             return token;
         } else {
             token.message = "invalid number";
-            token.col = col;
-            token.line = line;
+            token.col = lexer->col;
+            token.line = lexer->line;
             token.kind = TK_ERROR;
-            token.lexeme = buf+ index;
+            token.lexeme = lexer -> buf+ lexer -> index;
             token.length = 1;
-            index++;
-            col++;
+            lexer -> index++;
+            lexer->col++;
             return token;
         }
     }
     
-    switch(buf[index]) {
+    switch(lexer -> buf[lexer -> index]) {
         case '{':
             token.kind = TK_LBRACE;
             break;
@@ -81,95 +82,95 @@ Token lexer_next(char *buf) {
             token.kind = TK_COMMA;
             break;
         case 't':
-            if (scan_literal_true(buf + index, &token, line, col)) {
-                index += 4;
-                col += 4;
+            if (scan_literal_true(lexer -> buf + lexer -> index, &token, lexer->line, lexer->col)) {
+                lexer -> index += 4;
+                lexer->col += 4;
                 return token;
             } else {
                 token.message = "invalid token starts with: t";
-                token.col = col;
-                token.line = line;
+                token.col = lexer->col;
+                token.line = lexer->line;
                 token.kind = TK_ERROR;
-                token.lexeme = buf+ index;
+                token.lexeme = lexer -> buf+ lexer -> index;
                 token.length = 1;
-                index++;
-                col++;
+                lexer -> index++;
+                lexer->col++;
                 return token;
             }
         case 'f':
-            if (scan_literal_false(buf + index, &token, line, col)) {
-                index += 5;
-                col += 5;
+            if (scan_literal_false(lexer -> buf + lexer -> index, &token, lexer->line, lexer->col)) {
+                lexer -> index += 5;
+                lexer->col += 5;
                 return token;
             } else {
                 token.message = "invalid token starts with: f";
-                token.col = col;
-                token.line = line;
+                token.col = lexer->col;
+                token.line = lexer->line;
                 token.kind = TK_ERROR;
-                token.lexeme = buf+ index;
+                token.lexeme = lexer -> buf+ lexer -> index;
                 token.length = 1;
-                index++;
-                col++;
+                lexer -> index++;
+                lexer->col++;
                 return token;
             }
         case 'n':
-            if (scan_literal_null(buf + index, &token, line, col)) {
-                index += 4;
-                col += 4;
+            if (scan_literal_null(lexer -> buf + lexer -> index, &token, lexer->line, lexer->col)) {
+                lexer -> index += 4;
+                lexer->col += 4;
                 return token;
             } else {
                 token.message = "invalid token starts with: n";
-                token.col = col;
-                token.line = line;
+                token.col = lexer->col;
+                token.line = lexer->line;
                 token.kind = TK_ERROR;
-                token.lexeme = buf+ index;
+                token.lexeme = lexer -> buf+ lexer -> index;
                 token.length = 1;
-                index++;
-                col++;
+                lexer -> index++;
+                lexer->col++;
                 return token;
             }
         case '"':
-            char_length = scan_string(buf + index, &token, line,col);
+            char_length = scan_string(lexer -> buf + lexer -> index, &token, lexer->line,lexer->col);
             if (char_length) {
-                index += char_length;
-                col += char_length;
+                lexer -> index += char_length;
+                lexer->col += char_length;
                 return token;
             } else {
                 token.message = "invalid string";
-                token.col = col;
-                token.line = line;
+                token.col = lexer->col;
+                token.line = lexer->line;
                 token.kind = TK_ERROR;
-                token.lexeme = buf+ index;
+                token.lexeme = lexer -> buf+ lexer -> index;
                 token.length = 1;
-                index++;
-                col++;
+                lexer -> index++;
+                lexer->col++;
                 return token;
             }
         case '\0':
             token.kind = TK_EOF;
-            token.lexeme = buf + index;
-            token.col = col;
-            token.line = line;
+            token.lexeme = lexer -> buf + lexer -> index;
+            token.col = lexer->col;
+            token.line = lexer->line;
             token.length = 0;
             return token;
         default:
             token.kind = TK_ERROR;
             token.message = "not supported token";
-            token.col = col;
-            token.line = line;
-            token.lexeme = buf + index;
+            token.col = lexer->col;
+            token.line = lexer->line;
+            token.lexeme = lexer -> buf + lexer -> index;
             token.length = 1;
-            index++;
-            col++;
+            lexer -> index++;
+            lexer->col++;
             return token;
     }
 
-    token.col = col;
-    token.line = line;  
-    token.lexeme = buf + index;
+    token.col = lexer->col;
+    token.line = lexer->line;  
+    token.lexeme = lexer -> buf + lexer -> index;
     token.length = 1;
-    index++;
-    col++;
+    lexer -> index++;
+    lexer->col++;
 
     return token;
 }

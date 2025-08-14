@@ -44,8 +44,10 @@ int main(int argc, char **argv) {
         }
 
         Token t;
+
+        Lexer lx = lexer_init(fd.buf);
         
-        while ((t = lexer_next(fd.buf)).kind != TK_EOF) {
+        while ((t = lexer_next(&lx)).kind != TK_EOF) {
             print_token(t);
         }
 
