@@ -18,13 +18,16 @@ void jv_free(Value *v) {
 
     switch(v->kind) {
         case JV_OBJECT:
-            for(int i=0; i<v->u.obj.len; i++) {
+            for(size_t i=0; i<v->u.obj.len; i++) {
+                if (v ->u.obj.items[i].key.is_owned) {
+                    free((void *) v ->u.obj.items[i].key.ptr);
+                }
                 jv_free(v->u.obj.items[i].value);
             }
+            free(v->u.obj.items);
             break;
         case JV_ARRAY:
-            int length = sizeof(v->u.arr.items) / sizeof(v->u.arr.items[0]);
-            for (int i=0; i < length; i++) {
+            for (size_t i=0; i < v->u.arr.len; i++) {
                 jv_free(v->u.arr.items[i]);
             }
             free(v->u.arr.items);
@@ -64,22 +67,34 @@ Value *jv_copy(const Value *v) {
             newValue->u.arr.cap = v->u.arr.cap;
             
             newValue->u.arr.items = malloc(sizeof(Value *) * v->u.arr.len);
+
             if (!newValue->u.arr.items) {
                 free(newValue);
                 return NULL;
             }
 
-            for (int i=0; i<v->u.arr.len; i++) {
+            for (size_t i=0; i<v->u.arr.len; i++) {
                 newValue->u.arr.items[i] = jv_copy(v->u.arr.items[i]);
+                if (!newValue->u.arr.items[i]) {
+                    for (size_t q=0; q<=i; q++) {
+                        jv_free(newValue->u.arr.items[q]);
+                    }
+                    free(newValue ->u.arr.items);
+                    free(newValue);
+                    return NULL;
+                }
             }
 
             break;
+
         case JV_OBJECT:
             newValue->u.obj.cap = v->u.obj.cap;
             newValue->u.obj.len = v->u.obj.len;
 
             newValue->u.obj.items = malloc(sizeof(JMember) * v->u.obj.len);
+
             if (!newValue->u.obj.items) {
+                free(newValue);
                 return NULL;
             }
 
@@ -91,11 +106,18 @@ Value *jv_copy(const Value *v) {
                 if (src->key.is_owned) {
                     // 원본이 소유하는 키면 새로 할당
                     char *new_key = malloc(src->key.len + 1);
+
+                    // 실패시 전부 롤백.
                     if (!new_key) {
-                        // 에러 처리 (이전에 할당된 것들 해제 필요)
-                        // ... 정리 코드 ...
+                        for (size_t j = 0; j<i; j++) {
+                            free((void *) newValue->u.obj.items[j].key.ptr);
+                            jv_free(newValue->u.obj.items[j].value);
+                        }
+                        free(newValue->u.obj.items);
+                        jv_free(newValue);
                         return NULL;
                     }
+
                     memcpy(new_key, src->key.ptr, src->key.len);
                     new_key[src->key.len] = '\0';
                     
@@ -109,21 +131,26 @@ Value *jv_copy(const Value *v) {
                 
                 // 값 재귀 복사
                 dst->value = jv_copy(src->value);
+                if (!dst->value) {
+                    jv_free(newValue);
+                    return NULL;
+                }
             }
 
             break;
-        case JV_STRING:
+        case JV_STRING: {
             char *new_ptr = malloc(v->u.str.len + 1);
             if (!new_ptr) {
                 return NULL;
             }
-            strcpy(new_ptr, v->u.str.ptr);
+            memcpy(new_ptr, v->u.str.ptr, v->u.str.len);
             new_ptr[v->u.str.len] = '\0';
 
             newValue->u.str.ptr = new_ptr;
             newValue->u.str.len = v->u.str.len;
             newValue->u.str.is_owned = 1;
             break;
+        }
         case JV_NUMBER:
             newValue->u.num = v->u.num;
             break;
@@ -166,13 +193,13 @@ const char *jv_get_string(const Value *v, size_t *len) {
         return NULL;
     }
 
-    if (v->u.str.len >= *len) {
+    if (v->u.str.len <= *len) {
         return v->u.str.ptr;
     }
 
     // len 길이보다 길다? 그럼 잘라야.
     
-    char *sliced = malloc(sizeof(char) * (*len));
+    char *sliced = malloc(sizeof(char) * (*len) + 1);
     strncpy(sliced, v->u.str.ptr, *len);
     sliced[*len] = '\0';
 
