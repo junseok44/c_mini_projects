@@ -316,10 +316,10 @@ int scan_string(const char *p, Token *token, int line, int col) {
         if (c == '"') {
             i++; // closing quote 포함
             token->kind = TK_STRING;
-            token->length = i;
+            token->length = i - 2;
             token->line = line;
             token->col = col;
-            token->lexeme = p;
+            token->lexeme = p + 1;
             return i;
         }
 
