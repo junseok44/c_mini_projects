@@ -35,6 +35,7 @@ bin/
 # Todo 파일들 (개인용)
 Todo.md
 */Todo.md
+*.md
 
 # 컴파일 명령어 데이터베이스 (선택적)
 # compile_commands.json

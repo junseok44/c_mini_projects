@@ -1,0 +1,17 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-g",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "build/main.o",
+      "src/main.c"
+    ],
+    "directory": "/Users/jangjunseok/Desktop/playground/c-mini-project/socket-server",
+    "file": "/Users/jangjunseok/Desktop/playground/c-mini-project/socket-server/src/main.c",
+    "output": "/Users/jangjunseok/Desktop/playground/c-mini-project/socket-server/build/main.o"
+  }
+]
