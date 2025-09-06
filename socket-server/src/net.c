@@ -14,7 +14,7 @@ int setup_listen_socket(uint16_t port) {
     if (fd < 0) { perror("socket"); exit(1); }
 
     int yes = 1;
-    
+
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0) {
         perror("setsockopt(SO_REUSEADDR)"); exit(1);
     }
@@ -46,4 +46,11 @@ int send_all(int fd, const void* buf, size_t len) {
         sent += (size_t)n;
     }
     return 0;
+}
+
+int send_frame(int fd, const void* payload, uint32_t len) {
+    uint32_t netlen = htonl(len);
+    if (send_all(fd, &netlen, sizeof(netlen)) < 0) return -1;
+    if (len == 0) return 0;
+    return send_all(fd, payload, len);
 }
