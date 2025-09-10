@@ -1,0 +1,56 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-g",
+      "-O2",
+      "-std=c11",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "build/main.o",
+      "src/main.c"
+    ],
+    "directory": "/Users/jangjunseok/Desktop/playground/c-mini-project/mini-bash-like-shell",
+    "file": "/Users/jangjunseok/Desktop/playground/c-mini-project/mini-bash-like-shell/src/main.c",
+    "output": "/Users/jangjunseok/Desktop/playground/c-mini-project/mini-bash-like-shell/build/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-g",
+      "-O2",
+      "-std=c11",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "build/parse.o",
+      "src/parse.c"
+    ],
+    "directory": "/Users/jangjunseok/Desktop/playground/c-mini-project/mini-bash-like-shell",
+    "file": "/Users/jangjunseok/Desktop/playground/c-mini-project/mini-bash-like-shell/src/parse.c",
+    "output": "/Users/jangjunseok/Desktop/playground/c-mini-project/mini-bash-like-shell/build/parse.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-g",
+      "-O2",
+      "-std=c11",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "build/sig.o",
+      "src/sig.c"
+    ],
+    "directory": "/Users/jangjunseok/Desktop/playground/c-mini-project/mini-bash-like-shell",
+    "file": "/Users/jangjunseok/Desktop/playground/c-mini-project/mini-bash-like-shell/src/sig.c",
+    "output": "/Users/jangjunseok/Desktop/playground/c-mini-project/mini-bash-like-shell/build/sig.o"
+  }
+]
