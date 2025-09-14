@@ -1,5 +1,6 @@
 #include "sig.h"
 #include <signal.h>
+#include <stdio.h>
 
 /* 부모 셸은 Ctrl+C(SIGINT)를 무시 → 셸은 죽지 않음 */
 void ignore_sigint_in_parent(void) {
