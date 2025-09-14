@@ -1,34 +1,112 @@
-# read_file_all
+# JSON Parser
 
-파일 전체 읽기, 널 종료 보장(buf[len] = '\0')
-실패 시: false 반환 + 에러 메시지 문자열 제공(예: "open failed: <errno>")
-큰 파일(수 MB)도 처리(리사이즈 루프 or stat 기반 단번에 할당 정책 중 하나 선택)
+JSON 파싱과 쿼리 기능을 제공하는 C 라이브러리입니다.
 
-존재 파일: fixtures/nested.json → len > 0, 마지막 바이트 '\0'
-미존재: fixtures/nope.json → 실패 메시지 확인
-큰 파일: dd if=/dev/zero of=fixtures/big.json bs=1k count=512 후 읽기(널 종료 확인)
+## 기능
 
-# 토큰 지원 조건.
+- **JSON 파싱**: JSON 문자열을 파싱하여 내부 데이터 구조로 변환
+- **JSON 출력**: 파싱된 데이터를 다시 JSON 형태로 출력 (포맷팅/압축 모드)
+- **경로 쿼리**: JSONPath 스타일의 경로 표현식으로 특정 값 추출
 
-1단계 지원 토큰: { } [ ] : , + EOF + ERROR
-(리터럴/문자열/숫자는 내일)
+## 빌드
 
-공백 스킵: space, tab, CR, LF. line/col 카운팅 규칙:
-\n 만나면 line++, col = 1
-그 외 문자는 col++
-토큰 구조 출력 포맷(디버그용):
-예) L1:C1 TK_LBRACE, L1:C2 TK_RBRACE …
+```bash
+make
+```
 
-# 정책
+## 사용법
 
-정상: 0
-잘못된 사용법/알 수 없는 커맨드: 2
-파일 읽기 실패: 2
-파싱 실패: 1
-get에서 경로 미존재/타입 불일치: 3
+### 1. JSON 파일 파싱
 
-## 에러 메시지 형식
+```bash
+./bin/json-parser parse data.json
+```
 
-파싱 실패: line <L>, col <C>: <message>
+JSON 파일을 파싱하고 포맷팅된 형태로 출력합니다.
 
-파일 실패: file error: <path>: <reason>
+### 2. 특정 값 추출
+
+```bash
+./bin/json-parser get data.json "user.name"
+./bin/json-parser get data.json "items[0].price"
+./bin/json-parser get data.json "config.settings.debug"
+```
+
+JSONPath 스타일의 경로 표현식을 사용하여 특정 값을 추출합니다.
+
+#### 경로 표현식 예시
+
+- `foo.bar`: 객체의 속성 접근
+- `arr[0]`: 배열의 인덱스 접근
+- `user.items[2].name`: 중첩된 구조 접근
+- `config.settings`: 객체 전체 접근
+
+## 프로젝트 구조
+
+```
+json-parser/
+├── src/
+│   ├── main.c           # 메인 실행 파일
+│   ├── lexer_next.c     # JSON 토큰화
+│   ├── parser.c         # JSON 파싱 로직
+│   ├── value.c          # JSON 값 타입 구현
+│   ├── dump.c           # JSON 출력 기능
+│   ├── read_file.c      # 파일 읽기 유틸리티
+│   └── resolve_path.c   # 경로 해석 로직
+├── include/
+│   ├── lexer_next.h     # 렉서 헤더
+│   ├── parser.h         # 파서 헤더  
+│   ├── value.h          # 값 타입 정의
+│   ├── dump.h           # 출력 기능 헤더
+│   └── read_file.h      # 파일 읽기 헤더
+├── fixtures/            # 테스트용 JSON 파일들
+└── bin/                 # 빌드된 실행 파일
+```
+
+## 지원하는 JSON 타입
+
+- **Object**: `{"key": "value"}`
+- **Array**: `[1, 2, 3]`
+- **String**: `"hello world"`
+- **Number**: `42`, `3.14`
+- **Boolean**: `true`, `false`
+- **Null**: `null`
+
+## 예시
+
+### 예시 JSON 파일 (test.json)
+```json
+{
+  "name": "John Doe",
+  "age": 30,
+  "address": {
+    "city": "Seoul",
+    "zipcode": "12345"
+  },
+  "hobbies": ["reading", "coding", "music"]
+}
+```
+
+### 명령어 예시
+```bash
+# 전체 JSON 파싱 및 출력
+./bin/json-parser parse test.json
+
+# 이름 추출
+./bin/json-parser get test.json "name"
+# 출력: "John Doe"
+
+# 도시 추출  
+./bin/json-parser get test.json "address.city"
+# 출력: "Seoul"
+
+# 첫 번째 취미 추출
+./bin/json-parser get test.json "hobbies[0]"
+# 출력: "reading"
+```
+
+## 오류 처리
+
+- 잘못된 JSON 문법 시 파싱 에러와 위치 정보 제공
+- 존재하지 않는 경로 접근 시 적절한 오류 메시지 출력
+- 파일 읽기 실패 시 시스템 오류 메시지 제공
